@@ -123,6 +123,8 @@ bool solve_sudoku(int *grid, int n, int row, int col)
     // Try to place a number in the current cell
     for (int num = n; num > 0; num--)
     {
+        // if (col == 20)
+        // cout << "row: " << row << " col: " << col << " num: " << num << endl;
         if (is_safe(grid, n, row, col, num))
         {
             // cout << "row: " << row << " col: " << col << " num: " << num << endl;
@@ -250,7 +252,7 @@ int main(int argc, char **argv)
     // {
     //     ans[i] = grid[i];
     // }
-    int rm_cnt = n * n * 0.3;
+    int rm_cnt = n * n * 0.7;
     remove_standard(grid, n, rm_cnt);
     cout << "Input grid: " << endl;
     print_grid(grid, n);
