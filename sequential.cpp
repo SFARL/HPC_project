@@ -258,8 +258,8 @@ int main(int argc, char **argv)
     print_grid(grid, n);
     // cout << "Answer grid: " << endl;
     // print_grid(ans, n);
-    auto t_end = std::chrono::high_resolution_clock::now();
-    cout << "Build time cost: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t_end - t_start).count() * 1e-9 << " s" << endl;
+    // auto t_end = std::chrono::high_resolution_clock::now();
+    // cout << "Build time cost: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t_end - t_start).count() * 1e-9 << " s" << endl;
 
     t_start = std::chrono::high_resolution_clock::now();
     if (solve_sudoku(grid, n, 0, 0))
@@ -275,7 +275,7 @@ int main(int argc, char **argv)
         cout << "No solution exists or can't find the solution" << endl;
     }
     print_grid(grid, n);
-    t_end = std::chrono::high_resolution_clock::now();
+    auto t_end = std::chrono::high_resolution_clock::now();
     cout << "Solve time cost: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t_end - t_start).count() * 1e-9 << " s" << endl;
     free(grid);
     return 0;
