@@ -7,6 +7,8 @@ Including sequential and parallel version.
 ## Sequential
 
 ```shell
+cd sequential
+
 module load openmpi/intel/4.1.1
 
 make
