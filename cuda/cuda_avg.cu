@@ -275,6 +275,7 @@ __global__ void cudaBackTrack(int *grid, int *empty_space, int *empty_cnt, bool 
     grid_now = grid + index * n * n;
     empty_space_now = empty_space + index * n * n;
     empty_cnt_now = empty_cnt[index];
+    // printf("solve? %d\n", *solved);
     while (empty_index_cnt < empty_cnt_now)
     {
         // printf("index %d empty_index_cnt %d of  empty_cnt_now %d empty_index_cnt %d empty_index_val %d\n", index, empty_index_cnt, empty_cnt_now, empty_space_now[empty_index_cnt], grid_now[empty_space_now[empty_index_cnt]]);
@@ -429,6 +430,7 @@ int main()
                         cudaMemcpy(new_grid, old_grid, bfs_array_size, cudaMemcpyDeviceToDevice);
                     }
                     solved_cpu = false;
+                    cudaMemcpy(solved, &solved_cpu, sizeof(bool), cudaMemcpyHostToDevice);
                     cudaDeviceSynchronize();
                     auto t_start = std::chrono::high_resolution_clock::now();
                     cudaBackTrack<<<grim_dim, block_dim>>>(new_grid, empty_space, empty_cnt, solved, answer_cuda, n);
@@ -456,7 +458,8 @@ int main()
                     cudaFree(solved);
                     cudaFree(answer_cuda);
                 }
-                printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+                // printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+                printf("%d, %d, %d, %d, %f, %f, %f\n", n, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
             }
         }
     }
@@ -552,6 +555,7 @@ int main()
                         cudaMemcpy(new_grid, old_grid, bfs_array_size, cudaMemcpyDeviceToDevice);
                     }
                     solved_cpu = false;
+                    cudaMemcpy(solved, &solved_cpu, sizeof(bool), cudaMemcpyHostToDevice);
                     cudaDeviceSynchronize();
                     auto t_start = std::chrono::high_resolution_clock::now();
                     cudaBackTrack<<<grim_dim, block_dim>>>(new_grid, empty_space, empty_cnt, solved, answer_cuda, n);
@@ -580,7 +584,8 @@ int main()
                     cudaFree(solved);
                     cudaFree(answer_cuda);
                 }
-                printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+                // printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+                printf("%d, %d, %d, %d, %f, %f, %f\n", n, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
             }
         }
     }
@@ -588,128 +593,130 @@ int main()
     free(mask);
     free(answer);
 
-    // Test for order 5
-    root = 5;
-    n = root * root;
-    grid = (int *)malloc(n * n * sizeof(int));
-    mask = (int *)malloc(n * n * sizeof(int));
-    answer = (int *)malloc(n * n * sizeof(int));
-    for (int i = 0; i < n * n; i++)
-    {
-        grid[i] = 0;
-    }
-    build_sudoku(grid, n);
-    memcpy(mask, grid, n * n * sizeof(int));
-    // int level, block_dim, grim_dim, bfs_cnt, bfs_array_size;                       // cpu
-    // int *old_grid, *new_grid, *empty_space, *empty_cnt, *grid_index, *answer_cuda; // cuda
-    // bool *solved;
-    for (int i_level = 0; i_level < 2; i_level++)
-    {
-        // Different bfs level
-        level = iter_levels[i_level];
-        for (int i_block = 0; i_block < 4; i_block++)
-        {
-            // Different block size
-            block_dim = bolck_dims[i_block];
+    // // Test for order 5
+    // root = 5;
+    // n = root * root;
+    // grid = (int *)malloc(n * n * sizeof(int));
+    // mask = (int *)malloc(n * n * sizeof(int));
+    // answer = (int *)malloc(n * n * sizeof(int));
+    // for (int i = 0; i < n * n; i++)
+    // {
+    //     grid[i] = 0;
+    // }
+    // build_sudoku(grid, n);
+    // memcpy(mask, grid, n * n * sizeof(int));
+    // // int level, block_dim, grim_dim, bfs_cnt, bfs_array_size;                       // cpu
+    // // int *old_grid, *new_grid, *empty_space, *empty_cnt, *grid_index, *answer_cuda; // cuda
+    // // bool *solved;
+    // for (int i_level = 0; i_level < 2; i_level++)
+    // {
+    //     // Different bfs level
+    //     level = iter_levels[i_level];
+    //     for (int i_block = 0; i_block < 4; i_block++)
+    //     {
+    //         // Different block size
+    //         block_dim = bolck_dims[i_block];
 
-            for (int i_drop_rate = 0; i_drop_rate < 4; i_drop_rate++)
-            {
-                // drop rate
-                solve_cnt = 0;
-                time_taken = 0;
-                drop_rate = drop_rate_4[i_drop_rate];
-                rm_cnt = n * n * drop_rate;
-                for (int i_rs = 0; i_rs < 10; i_rs++)
-                {
+    //         for (int i_drop_rate = 0; i_drop_rate < 4; i_drop_rate++)
+    //         {
+    //             // drop rate
+    //             solve_cnt = 0;
+    //             time_taken = 0;
+    //             drop_rate = drop_rate_4[i_drop_rate];
+    //             rm_cnt = n * n * drop_rate;
+    //             for (int i_rs = 0; i_rs < 10; i_rs++)
+    //             {
 
-                    memcpy(mask, grid, n * n * sizeof(int));
-                    srand(rand_seed[i_rs]);
-                    remove_standard(mask, n, rm_cnt);
-                    bfs_cnt = cnt_start_board(mask, n, level, 0, 0);
-                    grim_dim = bfs_cnt / block_dim + 1;
-                    time_taken = 0;
+    //                 memcpy(mask, grid, n * n * sizeof(int));
+    //                 srand(rand_seed[i_rs]);
+    //                 remove_standard(mask, n, rm_cnt);
+    //                 bfs_cnt = cnt_start_board(mask, n, level, 0, 0);
+    //                 grim_dim = bfs_cnt / block_dim + 1;
+    //                 time_taken = 0;
 
-                    bfs_array_size = bfs_cnt * n * n * sizeof(int);
-                    cudaMalloc(&new_grid, bfs_array_size);
-                    cudaMalloc(&old_grid, bfs_array_size);
-                    cudaMalloc(&empty_space, bfs_array_size);
-                    cudaMalloc(&empty_cnt, bfs_array_size / n / n + 1);
-                    cudaMalloc(&grid_index, sizeof(int));
-                    cudaMalloc(&solved, sizeof(bool));
-                    cudaMalloc(&answer_cuda, n * n * sizeof(int));
-                    cudaDeviceSynchronize();
-                    cudaMemset(grid_index, 0, sizeof(int));
-                    cudaMemset(new_grid, 0, bfs_array_size);
-                    cudaMemset(old_grid, 0, bfs_array_size);
-                    cudaMemset(empty_space, 0, bfs_array_size);
-                    cudaMemset(empty_cnt, 0, bfs_array_size / n / n + 1);
-                    cudaMemset(solved, false, sizeof(bool));
-                    cudaDeviceSynchronize();
-                    cudaMemcpy(old_grid, mask, n * n * sizeof(int), cudaMemcpyHostToDevice);
+    //                 bfs_array_size = bfs_cnt * n * n * sizeof(int);
+    //                 cudaMalloc(&new_grid, bfs_array_size);
+    //                 cudaMalloc(&old_grid, bfs_array_size);
+    //                 cudaMalloc(&empty_space, bfs_array_size);
+    //                 cudaMalloc(&empty_cnt, bfs_array_size / n / n + 1);
+    //                 cudaMalloc(&grid_index, sizeof(int));
+    //                 cudaMalloc(&solved, sizeof(bool));
+    //                 cudaMalloc(&answer_cuda, n * n * sizeof(int));
+    //                 cudaDeviceSynchronize();
+    //                 cudaMemset(grid_index, 0, sizeof(int));
+    //                 cudaMemset(new_grid, 0, bfs_array_size);
+    //                 cudaMemset(old_grid, 0, bfs_array_size);
+    //                 cudaMemset(empty_space, 0, bfs_array_size);
+    //                 cudaMemset(empty_cnt, 0, bfs_array_size / n / n + 1);
+    //                 cudaMemset(solved, false, sizeof(bool));
+    //                 cudaDeviceSynchronize();
+    //                 cudaMemcpy(old_grid, mask, n * n * sizeof(int), cudaMemcpyHostToDevice);
 
-                    int grid_cnt = 0;
-                    int iter = 0;
-                    while (iter < level + 1)
-                    {
-                        cudaMemcpy(&grid_cnt, grid_index, sizeof(int), cudaMemcpyDeviceToHost);
-                        if (iter == 0)
-                        {
-                            grid_cnt = 1;
-                        }
-                        // printf("iter %d, grid_cnt %d\n", iter, grid_cnt);
-                        cudaMemset(grid_index, 0, sizeof(int));
-                        cudaDeviceSynchronize();
-                        if (iter % 2 == 0)
-                        {
-                            bfs<<<grim_dim, block_dim>>>(old_grid, new_grid, grid_cnt, grid_index, empty_space, empty_cnt, n);
-                        }
-                        else
-                        {
-                            bfs<<<grim_dim, block_dim>>>(new_grid, old_grid, grid_cnt, grid_index, empty_space, empty_cnt, n);
-                        }
-                        cudaDeviceSynchronize();
-                        iter++;
-                    }
-                    // printf("Order: %d, Level: %d, Grim: %d,Block: %d, Drop rate: %f, Rand seed: %d iter %d, grid_cnt %d and bfs_cnt %d\n", root, level, grim_dim, block_dim, drop_rate, rand_seed[i_rs], iter, grid_cnt, bfs_cnt);
-                    if (iter % 2 == 0)
-                    {
-                        cudaMemcpy(new_grid, old_grid, bfs_array_size, cudaMemcpyDeviceToDevice);
-                    }
-                    solved_cpu = false;
-                    cudaDeviceSynchronize();
-                    auto t_start = std::chrono::high_resolution_clock::now();
-                    cudaBackTrack<<<grim_dim, block_dim>>>(new_grid, empty_space, empty_cnt, solved, answer_cuda, n);
-                    cudaDeviceSynchronize();
-                    auto t_end = std::chrono::high_resolution_clock::now();
+    //                 int grid_cnt = 0;
+    //                 int iter = 0;
+    //                 while (iter < level + 1)
+    //                 {
+    //                     cudaMemcpy(&grid_cnt, grid_index, sizeof(int), cudaMemcpyDeviceToHost);
+    //                     if (iter == 0)
+    //                     {
+    //                         grid_cnt = 1;
+    //                     }
+    //                     // printf("iter %d, grid_cnt %d\n", iter, grid_cnt);
+    //                     cudaMemset(grid_index, 0, sizeof(int));
+    //                     cudaDeviceSynchronize();
+    //                     if (iter % 2 == 0)
+    //                     {
+    //                         bfs<<<grim_dim, block_dim>>>(old_grid, new_grid, grid_cnt, grid_index, empty_space, empty_cnt, n);
+    //                     }
+    //                     else
+    //                     {
+    //                         bfs<<<grim_dim, block_dim>>>(new_grid, old_grid, grid_cnt, grid_index, empty_space, empty_cnt, n);
+    //                     }
+    //                     cudaDeviceSynchronize();
+    //                     iter++;
+    //                 }
+    //                 // printf("Order: %d, Level: %d, Grim: %d,Block: %d, Drop rate: %f, Rand seed: %d iter %d, grid_cnt %d and bfs_cnt %d\n", root, level, grim_dim, block_dim, drop_rate, rand_seed[i_rs], iter, grid_cnt, bfs_cnt);
+    //                 if (iter % 2 == 0)
+    //                 {
+    //                     cudaMemcpy(new_grid, old_grid, bfs_array_size, cudaMemcpyDeviceToDevice);
+    //                 }
+    //                 solved_cpu = false;
+    //                 cudaMemcpy(solved, &solved_cpu, sizeof(bool), cudaMemcpyHostToDevice);
+    //                 cudaDeviceSynchronize();
+    //                 auto t_start = std::chrono::high_resolution_clock::now();
+    //                 cudaBackTrack<<<grim_dim, block_dim>>>(new_grid, empty_space, empty_cnt, solved, answer_cuda, n);
+    //                 cudaDeviceSynchronize();
+    //                 auto t_end = std::chrono::high_resolution_clock::now();
 
-                    cudaMemcpy(&solved_cpu, solved, sizeof(bool), cudaMemcpyDeviceToHost);
-                    if (solved_cpu)
-                    {
-                        time_taken += std::chrono::duration_cast<std::chrono::nanoseconds>(t_end - t_start).count() * 1e-9;
-                        solve_cnt++;
-                    }
+    //                 cudaMemcpy(&solved_cpu, solved, sizeof(bool), cudaMemcpyDeviceToHost);
+    //                 if (solved_cpu)
+    //                 {
+    //                     time_taken += std::chrono::duration_cast<std::chrono::nanoseconds>(t_end - t_start).count() * 1e-9;
+    //                     solve_cnt++;
+    //                 }
 
-                    // for
-                    // cudaMemcpy(mask, new_grid, n * n * sizeof(int), cudaMemcpyDeviceToHost);
-                    // print_grid(mask, n);
-                    // int *test_empty = empty_space + 6 * n * n * sizeof(int);
-                    // cudaMemcpy(mask, test_empty, n * n * sizeof(int), cudaMemcpyDeviceToHost);
-                    // print_grid(mask, n);
+    //                 // for
+    //                 // cudaMemcpy(mask, new_grid, n * n * sizeof(int), cudaMemcpyDeviceToHost);
+    //                 // print_grid(mask, n);
+    //                 // int *test_empty = empty_space + 6 * n * n * sizeof(int);
+    //                 // cudaMemcpy(mask, test_empty, n * n * sizeof(int), cudaMemcpyDeviceToHost);
+    //                 // print_grid(mask, n);
 
-                    cudaFree(new_grid);
-                    cudaFree(old_grid);
-                    cudaFree(empty_space);
-                    cudaFree(empty_cnt);
-                    cudaFree(grid_index);
-                    cudaFree(solved);
-                    cudaFree(answer_cuda);
-                }
-                printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
-            }
-        }
-    }
-    free(grid);
-    free(mask);
-    free(answer);
+    //                 cudaFree(new_grid);
+    //                 cudaFree(old_grid);
+    //                 cudaFree(empty_space);
+    //                 cudaFree(empty_cnt);
+    //                 cudaFree(grid_index);
+    //                 cudaFree(solved);
+    //                 cudaFree(answer_cuda);
+    //             }
+    //             // printf("Order: %d, level: %d, grim %d, block: %d, drop_rate: %f, solved rate %f time taken: %f\n", root, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+    //             printf("%d, %d, %d, %d, %f, %f, %f\n", n, level, grim_dim, block_dim, drop_rate, solve_cnt / 10.0, time_taken / solve_cnt);
+    //         }
+    //     }
+    // }
+    // free(grid);
+    // free(mask);
+    // free(answer);
     return 0;
 }
