@@ -15,6 +15,15 @@ make
 
 ./sequential_avg
 ```
+## Openmp
+```shell
+cd openmp
+
+make
+
+./openmp <num of threads> <rate of mask>
+./opemmp 16 0.6
+```
 
 ## Cuda
 
