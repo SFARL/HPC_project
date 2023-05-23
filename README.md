@@ -9,7 +9,7 @@ Including sequential and parallel version.
 ```shell
 cd sequential
 
-module load openmpi/intel/4.1.1
+module load gcc-9.2
 
 make
 
