@@ -4,7 +4,7 @@ Including sequential and parallel version.
 
 # Compile and run the code
 
-## Sequential
+## Sequential - on CIMS
 
 ```shell
 cd sequential
@@ -25,7 +25,7 @@ make
 ./opemmp 16 0.6
 ```
 
-## Cuda
+## Cuda - on Greene
 
 ```shell
 cd cuda
