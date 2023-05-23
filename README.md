@@ -19,6 +19,8 @@ make
 ```shell
 cd openmp
 
+module load gcc-9.2
+
 make
 
 ./openmp <num of threads> <rate of mask>
