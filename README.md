@@ -15,7 +15,7 @@ make
 
 ./sequential_avg
 ```
-## Openmp
+## Openmp - on CIMS
 ```shell
 cd openmp
 
