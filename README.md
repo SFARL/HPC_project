@@ -1,6 +1,6 @@
 # Sudoku solvers.
 
-Including sequential and parallel version.
+Including sequential and parallel versions. The details of the implementation are in the final report.
 
 # Compile and run the code
 
